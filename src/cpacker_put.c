@@ -4,6 +4,12 @@
 #include <strings.h>
 #include "cpacker.h"
 
+/**
+ * Store raw data in the buffer.
+ * \param buf CPacker buffer.
+ * \param src Data to store.
+ * \param length Data size to store.
+ */
 void cpacker_buf_put_data(cpacker_buf_t *buf, const char *src, size_t length)
 {
     cpacker_buf_ensure_size(buf, buf->size + length);
@@ -14,17 +20,11 @@ void cpacker_buf_put_data(cpacker_buf_t *buf, const char *src, size_t length)
 
 void cpacker_buf_put_size(cpacker_buf_t *buf, size_t n)
 {
-    union {
-        char data[sizeof(n)];
-        size_t n;
-    } u;
-
 #ifdef __x86_64
-    u.n = htole64(n);
+    cpacker_buf_put_uint64(buf, n);
 #else
-    u.n = htole32(n);
+    cpacker_buf_put_uint32(buf, n);
 #endif
-    cpacker_buf_put_data(buf, u.data, sizeof(n));
 }
 
 static void cpacker_buf_put_varint_n(cpacker_buf_t *buf, size_t n, uint8_t size, uint8_t mask)
